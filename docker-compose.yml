@@ -1,0 +1,11 @@
+# docker-compose.yml
+version: "3.9"
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: insighthub
+      POSTGRES_PASSWORD: insighthub
+      POSTGRES_DB: insighthub
+    ports:
+      - "5432:5432"
