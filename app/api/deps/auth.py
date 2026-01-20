@@ -11,20 +11,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
+
+
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
+    token: str = Depends(oauth2_scheme),
 ):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        if payload.get("type") != "access":
-            raise HTTPException(status_code=401, detail="Invalid token type")
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    user_id: str | None = payload.get("sub")
 
-        user_id = payload.get("sub")
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
-
-    except JWTError:
+    if user_id is None:
         raise HTTPException(status_code=401, detail="Invalid token")
 
     user = get_user_by_id(db, int(user_id))
