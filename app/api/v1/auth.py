@@ -1,24 +1,27 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from jose import JWTError, jwt
+from app.core.jwt import create_access_token
+from app.core.config import settings
+from fastapi import APIRouter
 
-from app.api.deps.db import get_db
-from app.schemas.auth import LoginRequest, TokenResponse
-from app.services.user_service import get_user_by_email
-from app.core.security import verify_password
-from app.core.jwt import create_access_token, create_refresh_token
-
-router = APIRouter(prefix="/auth", tags=["Auth"])
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=TokenResponse)
-def login(user_in: LoginRequest, db: Session = Depends(get_db)):
-    user = get_user_by_email(db, user_in.email)
+@router.post("/refresh")
+def refresh_token(refresh_token: str):
+    try:
+        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "refresh":
+            raise HTTPException(
+                status_code=401, detail="Invalid refresh token")
 
-    if not user or not verify_password(user_in.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        user_id = payload.get("sub")
+
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
 
     return {
-        "access_token": create_access_token(str(user.id)),
-        "refresh_token": create_refresh_token(str(user.id)),
+        "access_token": create_access_token(user_id),
         "token_type": "bearer",
     }

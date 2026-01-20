@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta, timezone
 from jose import jwt
-
-from app.core.config import SECRET_KEY, ALGORITHM
+from app.core.config import settings
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 REFRESH_TOKEN_EXPIRE_DAYS = 7
-
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
 
 def create_access_token(subject: str) -> str:
     expire = datetime.now(timezone.utc) + \
@@ -15,7 +15,8 @@ def create_access_token(subject: str) -> str:
         "exp": expire,
         "type": "access",
     }
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=ALGORITHM)
 
 
 def create_refresh_token(subject: str) -> str:
