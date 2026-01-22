@@ -1,18 +1,22 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel
+import uuid
 
 from app.api.deps.db import get_db
 from app.services.user_service import get_user_by_email
 from app.core.security import verify_password
-from app.core.jwt import create_access_token, create_refresh_token
-from jose import jwt, JWTError
-from app.core.config import settings
-from app.services.user_service import get_user_by_id
+from app.core.jwt import create_access_token
+from app.models.refresh_token import RefreshToken
 
 router = APIRouter(
     prefix="/auth",
     tags=["auth"],
 )
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
 
 
 @router.post("/login")
@@ -25,47 +29,61 @@ def login(
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
+    refresh_token_value = str(uuid.uuid4())
+
+    db_token = RefreshToken(
+        token=refresh_token_value,
+        user_id=user.id,
+        revoked=False,
+    )
+    db.add(db_token)
+    db.commit()
+
     return {
-        "access_token": create_access_token(data={"sub": str(user.id)}),
-        "refresh_token": create_refresh_token(data={"sub": str(user.id)}),
+        "access_token": create_access_token({"sub": str(user.id)}),
+        "refresh_token": refresh_token_value,
         "token_type": "bearer",
     }
 
 
 @router.post("/refresh")
-def refresh_token(refresh_token: str, db=Depends(get_db)):
-    try:
-        payload = jwt.decode(
-            refresh_token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM],
+def refresh_token(
+    payload: RefreshTokenRequest,
+    db=Depends(get_db),
+):
+    db_token = (
+        db.query(RefreshToken)
+        .filter(
+            RefreshToken.token == payload.refresh_token,
+            RefreshToken.revoked == False,
         )
+        .first()
+    )
 
-        if payload.get("type") != "refresh":
-            raise HTTPException(status_code=401, detail="Invalid token type")
+    if not db_token:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-        user_id = payload.get("sub")
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
+    return {
+        "access_token": create_access_token({"sub": str(db_token.user_id)}),
+        "token_type": "bearer",
+    }
 
-        try:
-            user_id = int(user_id)
-        except ValueError:
-            raise HTTPException(
-                status_code=401, detail="Invalid token subject")
 
-        user = get_user_by_id(db, user_id)
-        if not user:
-            raise HTTPException(status_code=401, detail="User not found")
+@router.post("/logout")
+def logout(
+    payload: RefreshTokenRequest,
+    db=Depends(get_db),
+):
+    db_token = (
+        db.query(RefreshToken)
+        .filter(RefreshToken.token == payload.refresh_token)
+        .first()
+    )
 
-        return {
-            "access_token": create_access_token(
-                data={"sub": str(user.id)}
-            ),
-            "token_type": "bearer",
-        }
+    if not db_token:
+        raise HTTPException(status_code=400, detail="Invalid token")
 
-    except JWTError:
-        raise HTTPException(
-            status_code=401, detail="Invalid or expired refresh token"
-        )
+    db_token.revoked = True
+    db.commit()
+
+    return {"message": "Logged out successfully"}

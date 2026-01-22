@@ -20,7 +20,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from app.models import user  # noqa: F401 (important!)
+from app.models import user, refresh_token  # noqa: F401 (important!)
 
 target_metadata = Base.metadata
 
