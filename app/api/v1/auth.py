@@ -43,6 +43,7 @@ def login(
         "access_token": create_access_token({"sub": str(user.id)}),
         "refresh_token": refresh_token_value,
         "token_type": "bearer",
+        "expires_in": 1800  # seconds (30 min)
     }
 
 
