@@ -91,9 +91,12 @@ psql --version
 ```
 ## 5️⃣ Create database & run migrations
 
-createdb insighthub
-alembic upgrade head
+```bash
 
+
+createdb insighthub alembic upgrade head
+
+```
 ## 6️⃣ Start the API
 
 ```bash
