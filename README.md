@@ -53,11 +53,16 @@ Make sure you have:
 	•	Homebrew (macOS) or equivalent package manager
 
 2️⃣ Clone & set up environment
+
+```bash
+
 git clone https://github.com/odhiambo123/insighthub.git
 cd insighthub
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+
+```
 
 3️⃣ Configure environment variables
 
@@ -80,9 +85,11 @@ brew services start postgresql@15
 
 
 Verify by 
+```bash
+
 
 psql --version
-
+```
 5️⃣ Create database & run migrations
 
 createdb insighthub
@@ -90,11 +97,18 @@ alembic upgrade head
 
 6️⃣ Start the API
 
+```bash
+
+
 uvicorn app.main:app --reload
+
+```
 
 🔐 Authentication & Testing the API
 
 1️⃣ Create a user
+```bash
+
 
 curl -X POST http://127.0.0.1:8000/api/v1/users/ \
   -H "Content-Type: application/json" \
@@ -103,39 +117,52 @@ curl -X POST http://127.0.0.1:8000/api/v1/users/ \
     "password": "Password123",
     "role": "admin"
   }'
-
+```
 
 2️⃣ Login and get tokens
+```bash
+
 
 curl -X POST http://127.0.0.1:8000/api/v1/auth/login \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=test@example.com&password=Password123"
-
+```
 Response:
+
+```bash
+
 
 {
   "access_token": "...",
   "refresh_token": "...",
   "token_type": "bearer"
 }
+```
 
 3️⃣ Call protected endpoints
 
+```bash
 curl http://127.0.0.1:8000/api/v1/users/me \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
-
+```
 4️⃣ Refresh access token
+
+```bash
+
 
 curl -X POST http://127.0.0.1:8000/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
   -d '{"refresh_token": "<REFRESH_TOKEN>"}'
-
+```
 5️⃣ Role-based endpoints
+
+```bash
+
 
 curl http://127.0.0.1:8000/api/v1/users/admin \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 
-
+```
 
 	•	✅ admin role → allowed
 	•	❌ user role → 403 Forbidden
