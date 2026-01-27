@@ -53,7 +53,7 @@ Make sure you have:
 	•	Homebrew (macOS) or equivalent package manager
 
 2️⃣ Clone & set up environment
-git clone https://github.com/ArgeliusLabs/Chasing-Your-Tail-NG.git
+git clone https://github.com/odhiambo123/insighthub.git
 cd insighthub
 python -m venv venv
 source venv/bin/activate
