@@ -2,7 +2,7 @@
 
 A production-ready FastAPI backend with JWT authentication, RBAC, and refresh token rotation.
 
-🔧 Tech Stack
+## 🔧 Tech Stack
 	•	FastAPI
 	•	PostgreSQL
 	•	SQLAlchemy + Alembic
@@ -10,7 +10,7 @@ A production-ready FastAPI backend with JWT authentication, RBAC, and refresh to
 	•	Passlib (bcrypt)
 	•	Role-Based Access Control
 
-🔐 Authentication Flow
+## 🔐 Authentication Flow
 	1.	User logs in with email/password
 	2.	API returns:
 	•	Short-lived access token
@@ -19,21 +19,20 @@ A production-ready FastAPI backend with JWT authentication, RBAC, and refresh to
 	4.	Refresh token rotates access tokens
 	5.	Logout revokes refresh token
 
-📌 Key Endpoints
+## 📌 Key Endpoints
+- POST   /api/v1/auth/login
+- POST   /api/v1/auth/refresh
+- POST   /api/v1/auth/logout
 
-POST   /api/v1/auth/login
-POST   /api/v1/auth/refresh
-POST   /api/v1/auth/logout
+- POST   /api/v1/users        (admin only)
+- GET    /api/v1/users/me
+- GET    /api/v1/users/admin
 
-POST   /api/v1/users        (admin only)
-GET    /api/v1/users/me
-GET    /api/v1/users/admin
-
-🛡 Roles
+## 🛡 Roles
 	•	user
 	•	admin
 
-Recap:
+## Recap:
 
 	•	✅ A real authentication system
 	•	✅ Proper RBAC
@@ -42,17 +41,17 @@ Recap:
 	•	✅ Clean architecture
 
 
-🚀 Running the App Locally
+## 🚀 Running the App Locally
 
-1️⃣ Prerequisites
+## 1️⃣ Prerequisites
 
-Make sure you have:
+### Make sure you have:
 	•	Python 3.10+
 	•	PostgreSQL 15
 	•	pip / venv
 	•	Homebrew (macOS) or equivalent package manager
 
-2️⃣ Clone & set up environment
+## 2️⃣ Clone & set up environment
 
 ```bash
 
@@ -64,7 +63,7 @@ pip install -r requirements.txt
 
 ```
 
-3️⃣ Configure environment variables
+## 3️⃣ Configure environment variables
 
 Create a .env file in the project root:
 
@@ -75,9 +74,9 @@ SECRET_KEY=dev-secret-key-change-me
 
 ```
 
-⚠️ SECRET_KEY is safe for local development only.
+### ⚠️ SECRET_KEY is safe for local development only.
 
-4️⃣ Start PostgreSQL
+## 4️⃣ Start PostgreSQL
 
 Ensure PostgreSQL is running:
 
@@ -90,12 +89,12 @@ Verify by
 
 psql --version
 ```
-5️⃣ Create database & run migrations
+## 5️⃣ Create database & run migrations
 
 createdb insighthub
 alembic upgrade head
 
-6️⃣ Start the API
+## 6️⃣ Start the API
 
 ```bash
 
@@ -104,9 +103,9 @@ uvicorn app.main:app --reload
 
 ```
 
-🔐 Authentication & Testing the API
+### 🔐 Authentication & Testing the API
 
-1️⃣ Create a user
+## 1️⃣ Create a user
 ```bash
 
 
@@ -119,7 +118,7 @@ curl -X POST http://127.0.0.1:8000/api/v1/users/ \
   }'
 ```
 
-2️⃣ Login and get tokens
+## 2️⃣ Login and get tokens
 ```bash
 
 
@@ -139,13 +138,13 @@ Response:
 }
 ```
 
-3️⃣ Call protected endpoints
+## 3️⃣ Call protected endpoints
 
 ```bash
 curl http://127.0.0.1:8000/api/v1/users/me \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
-4️⃣ Refresh access token
+## 4️⃣ Refresh access token
 
 ```bash
 
@@ -154,7 +153,7 @@ curl -X POST http://127.0.0.1:8000/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
   -d '{"refresh_token": "<REFRESH_TOKEN>"}'
 ```
-5️⃣ Role-based endpoints
+## 5️⃣ Role-based endpoints
 
 ```bash
 
@@ -169,7 +168,7 @@ curl http://127.0.0.1:8000/api/v1/users/admin \
 
 ⸻
 
-🧪 Testing (Manual)
+## 🧪 Testing (Manual)
 
 At this stage, the API is tested via:
 	•	Swagger UI (/docs)
@@ -180,7 +179,7 @@ Automated tests will be added in a future iteration.
 
 ⸻
 
-🧱 Tech Stack
+## 🧱 Tech Stack
 	•	FastAPI
 	•	PostgreSQL
 	•	SQLAlchemy
